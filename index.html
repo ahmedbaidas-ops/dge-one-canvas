@@ -4712,13 +4712,20 @@ html.mw-frame { --mw-safari: 90px; }
   html.w1-wide .fluid-canvas .mw-pagehead,
   html.w1-wide .fluid-canvas[dir="rtl"] .mw-pagehead { padding: 0; margin-bottom: 24px; gap: 0; }
 
-  html.w1-wide .mw-headtop {
+  /* the header sticks as a whole: .mw-headtop is only as tall as its own box, so sticking it inside
+     .mw-pagehead would let it scroll away with it. The stage (#stage) is the scroller. */
+  html.w1-wide .fluid-canvas .discovery-panel > .mw-pagehead {
     position: sticky; top: 0; z-index: 20;
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+  }
+  html.w1-wide .mw-headtop {
+    position: relative; z-index: 1;
     box-sizing: border-box;
     display: block;
     overflow: visible;
     border-radius: 0;
-    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    border-bottom: 0;
     padding-block: 12px 0;
     padding-inline: 0;
   }
@@ -4746,8 +4753,12 @@ html.mw-frame { --mw-safari: 90px; }
 
   /* the utility group: search · assistant · accessibility · on this page */
   html.w1-wide .w1-utils { flex: none; display: flex; align-items: center; gap: 4px; }
+  /* build 31's liquid glass draws the pill from a .mw-lg layer and pins the host's own background to
+     transparent !important; in the header bar the tools read as the room chips do, so the layer goes and the
+     hover fill is ours */
+  html.w1-wide .w1-utils .mw-dock-item > .mw-lg { display: none; }
   html.w1-wide .w1-utils .mw-dock-item {
-    box-shadow: none; background: transparent; border: 1px solid transparent;
+    box-shadow: none !important; background: transparent !important; border: 1px solid transparent;
     padding-block: 8px; padding-inline: 12px; min-height: 40px;
     font-size: 15px; line-height: 20px; opacity: 1; transform: none;
     flex-direction: row-reverse;                                                                   /* the glyph leads, as it does in the header's other controls */
@@ -4771,9 +4782,12 @@ html.mw-frame { --mw-safari: 90px; }
     }
   }
 
-  /* condensed: the bar stays, it just loses its second line — never the phone capsule */
+  /* condensed (build 31's behaviour, adapted): the bar and the breadcrumb stay stuck, the title block goes —
+     never the phone capsule */
   html.w1-wide.mw-condensed .mw-headtop { padding-block: 6px 0; }
   html.w1-wide.mw-condensed .w1-bar { min-height: 48px; }
+  html.w1-wide.mw-condensed .fluid-canvas .mw-pagehead > .mw-pagecard { display: none; }
+  html.w1-wide.mw-condensed .fluid-canvas .discovery-panel > .mw-pagehead { box-shadow: 0 1px 3px rgba(0, 0, 0, .06); }
   html.w1-wide.mw-canvas-mode.mw-condensed .fluid-canvas .discovery-panel > .mw-pagehead {
     max-height: none; opacity: 1; margin-bottom: 24px; visibility: visible; pointer-events: auto;
   }
@@ -4895,8 +4909,8 @@ html.mw-frame { --mw-safari: 90px; }
 
   /* ============================================================ 7. hover, never the focus ring (build 31 owns focus) */
   html.w1-wide .mw-chip2:hover,
-  html.w1-wide .w1-utils .mw-dock-item:hover,
   html.w1-wide .mw-idlang:hover { background: rgba(0, 0, 0, .06); }
+  html.w1-wide .w1-utils .mw-dock-item:hover { background: rgba(0, 0, 0, .06) !important; }
   html.w1-wide .mw-chip2[aria-current]:hover,
   html.w1-wide .mw-chip2[aria-expanded="true"]:hover { background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .18); }
   html.w1-wide .mw-lockup:hover { opacity: .78; }
@@ -5165,18 +5179,10 @@ html.mw-frame { --mw-safari: 90px; }
   }
 
   /* ---------------------------------------------------------------- 6 · page header, one language for every listing */
-  .content-layer.mw-w3-wide .browse-composition > .browse-heading {
-    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
-    margin: 0 0 24px;
-  }
-  .content-layer.mw-w3-wide .browse-composition > .browse-heading h1 {
-    margin: 0;
-    font-size: 64px; line-height: 70px; letter-spacing: -1.28px; font-weight: 400;
-    color: var(--w3-navy);
-    border: 0; background: none; box-shadow: none; padding: 0; border-radius: 0;
-    -webkit-backdrop-filter: none; backdrop-filter: none;
-  }
-  .content-layer.mw-w3-wide .browse-composition > .browse-heading .micro-label { margin-bottom: 8px; }
+  /* The room's own heading repeats the page card's title word for word (the page card above it already says
+     "Laws and policies" and the date it was reviewed).  One title per page: the card keeps it, this one goes.
+     The listing's real count is not lost — the library prints it as "<n> documents shown". */
+  .content-layer.mw-w3-wide .browse-composition > .browse-heading { display: none; }
   .content-layer.mw-w3-wide .browse-composition > .browse-intro,
   .content-layer.mw-w3-wide .browse-composition > .mw-ia32-purpose {
     max-width: 720px;                                              /* SPEC: prose never runs the full width */
@@ -5365,16 +5371,13 @@ html.mw-frame { --mw-safari: 90px; }
   }
   @media (max-width: 1024px) {
     .content-layer.mw-w3-wide .browse-composition { padding-inline: 24px; }
-    .content-layer.mw-w3-wide .browse-composition > .browse-heading h1 { font-size: 48px; line-height: 54px; letter-spacing: -.96px; }
     .content-layer.mw-w3-wide .discovery-grid, .content-layer.mw-w3-wide .mw-ia32-all { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 900px) {
     .mw-w3-group { flex-direction: column; gap: 20px; }
     .mw-w3-shelf { flex: 0 0 auto; width: auto; align-self: stretch; }
-    .content-layer.mw-w3-wide .browse-composition > .browse-heading { flex-direction: column; align-items: flex-start; gap: 8px; }
   }
   @media (max-width: 820px) {
-    .content-layer.mw-w3-wide .browse-composition > .browse-heading h1 { font-size: 40px; line-height: 46px; letter-spacing: -.8px; }
     .mw-w3-next .nx-row { grid-template-columns: minmax(0, 1fr); }
   }
 }
@@ -5397,7 +5400,6 @@ html.mw-frame { --mw-safari: 90px; }
   [dir="rtl"] .mw-w3-hero .hs-slot[data-n="0"] { transform: scale(.46) translate(-248px, 28px) rotate(-6deg); }
   [dir="rtl"] .mw-w3-hero .hs-slot[data-n="1"] { transform: scale(.46) translate(-126px, 10px) rotate(-2deg); }
   [dir="rtl"] .mw-w3-hero .hs-slot[data-n="2"] { transform: scale(.46) translate(-4px, 0) rotate(3deg); }
-  .content-layer.mw-w3-wide .browse-composition.mw-w3-hashero > .browse-heading,
   .content-layer.mw-w3-wide .browse-composition.mw-w3-hashero > .browse-intro,
   .content-layer.mw-w3-wide .browse-composition.mw-w3-hashero > .mw-ia32-purpose { position: relative; z-index: 1; max-width: 640px; }
 
@@ -5413,7 +5415,6 @@ html.mw-frame { --mw-safari: 90px; }
   .mw-w3-ac .ac-when { font-size: 12px; line-height: 16px; color: var(--w3-mute); }
 
   @media (max-width: 1180px) { .mw-w3-hero { display: none; }
-    .content-layer.mw-w3-wide .browse-composition.mw-w3-hashero > .browse-heading,
     .content-layer.mw-w3-wide .browse-composition.mw-w3-hashero > .browse-intro,
     .content-layer.mw-w3-wide .browse-composition.mw-w3-hashero > .mw-ia32-purpose { max-width: 720px; } }
   @media (max-width: 900px) { .mw-w3-amend .am-row { grid-template-columns: minmax(0, 1fr); } }
